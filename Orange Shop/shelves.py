@@ -1,9 +1,9 @@
-class Shelf:
-    
-    def __init__(self,size):
-        self.items=[0]*size
+class Shelves:
 
-    def add(self,x):
+    def __init__(self, amount):
+        self.items=[0]*amount
+
+    def add(self, x):
         self.items.append(x)
     
     def delete(self): 

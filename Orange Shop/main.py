@@ -1,111 +1,153 @@
-import os
 from apple import Apple
 from orange import Orange
 from shelf import Shelf
+from shelves import Shelves
 
-shelf = Shelf()
-containerOranges = 0
-containerApples = 0
-totalApples = 0
 totalOranges = 0
-oranges = 0
-apples = 0 
+totalApples = 0
+orangesAmount = 0
+applesAmount = 0
+orangesInShelves = 0
+applesInShelves = 0
+orangePrice = 0
+applePrice = 0
 
 def main():
-    global containerOranges, containerApples, oranges, apples, totalApples, totalOranges
-    print(""" 
-    --- Remember to buy merchandise before opening the store ---
-        1. Buy Oranges 
-        2. Apple order
-        3. Open the store
-    """)
-    ans = input("Select an option: ")
 
-    if ans == "1":
-        print("The purchase price of oranges is $2")
-        print("The selling price in the market for oranges is $4")
-        containerOranges = int(input(" Enter the number of containers you want to buy: "))
-        oranges = int(input(" Enter the number of oranges you want to buy in each container: "))
-        totalOranges = containerOranges * oranges
-        for i in range(totalOranges):
-            addOranges()
-        print("The amount of oranges you bought are: " + str(totalOranges)) 
-        os.system("Pause")
-        main()
+    global totalOranges,totalApples,orangesInShelves,applesInShelves,orangePrice,applePrice,orangesAmount,applesAmount
 
-    if ans == "2":
-        print(" --- This order of apples will arrive at the store when we have no more oranges ---")
-        print("The purchase price of apples is $3")
-        print("The selling price in the market for apples is $5")
-        containerApples = int(input(" Enter the number of containers you want to buy:"))
-        apples = int(input(" Enter the number of apple you want to buy in each container: "))
-        totalApples = containerApples * apples
-        print("The amount of apples you preordered are: " + str(totalApples))
-        os.system("Pause")
-        main()
-        
-    if ans == "3":
-        print("\n The number of oranges on the shelf is: " + str(shelf.size())+ "\n")
-        flag = True
-        while flag:
-            if(shelf.size() == 0):
-                print("""
-                -------------------------------
-                The order of apples has arrived
-                -------------------------------
-                """)
-                break
+    m = int(input("Amount of Shelves: "))
+    n = int(input("Capacity for each shelf: "))
 
-            soldOranges= int(input("How many oranges does the customer want to buy?: "))
+    print("--- Remember to buy merchandise before opening the store ---")
+    totalOranges = int(input("How many oranges do you want to buy : "))
+    orangesAmount = totalOranges
+    totalApples = int(input("How many apples do you want to buy : "))
+    applesAmount  = totalApples
+    orangePrice = int(input("Price per Orange: $"))
+    applePrice = int(input("Price per Apple: $"))
 
-            if(soldOranges > shelf.size()):
-                print("We only have: " + str(shelf.size()) + " Oranges")
+    print("--- Store Open ---")
 
-            else:
-                for i in range(soldOranges):
-                    deleteFruit()
-                print("\n The number of oranges on the shelf is: " + str(shelf.size())+ "\n")
+    shelves = createShelves(n,m)
+    fillShelves(shelves)
 
-        for i in range(totalApples):
-            addApples()
+    ans = True
+    while(ans):
+        if(orangesInShelves > 0):
+            ans=input("1. Sell an Orange:  ") 
+            if ans=="1":
+                if(shelves.items[0].size() > 0):
+                    sellOrange(shelves.items[0]) 
+                    totalFruits()
+            if(shelves.items[0].size() == 0):
+                deleteShelf(shelves)
+        if(orangesInShelves == 0):
+            ans = False
+    ans = True
+    while(ans):
+        if(applesInShelves > 0):
+            ans=input("1. Sell an Apple:  ") 
+            if ans=="1":
+                if(shelves.items[0].size() > 0):
+                    sellApple(shelves.items[0]) 
+                    totalFruits()
+            if(shelves.items[0].size() == 0):
+                deleteShelf(shelves)
+        if(applesInShelves == 0):
+            ans = False
 
-        print("The number of apples on the shelf is: " + str(shelf.size()))
+    print("--- Financial Report ---")
+    print("Money invested in oranges: $" + str(orangePrice * orangesAmount))
+    print("Money invested in apples: $" + str(applePrice * applesAmount))
 
-        while flag:
-            if(shelf.size() == 0):
-                print(" \n Luckily we close in 5 min because we don't have more Fruits \n")
-                break
-            soldApples= int(input("How many apples does the customer want to buy?: "))
+#Function that tells us the total number of fruits on the shelves
+def totalFruits():
+    global OrangesInShelves,applesInShelves
+    print("Oranges on the shelves: " + str(orangesInShelves))
+    print("Apples on the shelves: " + str(applesInShelves ))
 
-            if(soldApples > shelf.size()):
-                print("We only have: " + str(shelf.size()) + " Oranges")
+#Function that removes the shelf when is empty
+def deleteShelf(shelves):
+    shelves.delete()
 
-            else:
-                for i in range(soldApples):
-                    deleteFruit()
-
-            print("The number of apples on the shelf is: " + str(shelf.size()))
-
-        print(" ---- Financial Report ---- \n")
-        print("Total invested: $" + str(((totalApples * 3) + (totalOranges * 2))))
-        print("Total profit: $" + str(((totalApples * 2) + (totalOranges * 2))) + "\n")
-    
-    else:
-        print("Please, Enter a valid value")
-        main()
-
-def addOranges():
-    global shelf
-    orange = Orange()
-    shelf.add(orange)
-
-def addApples():
-    global shelf
-    apple = Apple()
-    shelf.add(apple)
-
-def deleteFruit():
-    global shelf
+#Function that removes the orange from the shelf
+def sellOrange(shelf):
+    global orangesInShelves
+    orangesInShelves -= 1
     shelf.delete()
+#Function that removes the apple from the shelf
+def sellApple(shelf):
+    global applesInShelves
+    applesInShelves -= 1
+    shelf.delete()
+            
+#Function that fills the shelves with fruits
+def fillShelves(shelves):
+    #We fill with oranges first
+    for i in range(shelves.size()):
+        for j in range(shelves.items[i].size()):
+            addOranges(totalOranges,shelves.items[i])
 
-main()
+    #We fill with apples
+    for i in range(shelves.size()):
+        for j in range(shelves.items[i].size()):
+            addApples(totalApples,shelves.items[i])
+    
+#Function in charge of adding an orange
+def addOneOrange(shelf,position):
+    global totalOranges, orangesInShelves
+    orange = Orange()
+    shelf.items[position] = orange
+    totalOranges -= 1
+    orangesInShelves += 1
+
+#Function in charge of adding an apple
+def addOneApple(shelf,position):
+    global totalApples, applesInShelves
+    apple = Apple()
+    shelf.items[position] = apple
+    totalApples -= 1
+    applesInShelves += 1
+
+#Function in charge of adding oranges to the shelf
+def addOranges(amount,shelf):
+    global Totaloranges
+    for i in range(shelf.size()):
+        if space(shelf) == True:
+            orange = Orange()
+            if(i < amount):
+                addOneOrange(shelf,i)
+        if space(shelf) == False:
+            i = i + 1
+
+#Function in charge of adding apples to the shelf
+def addApples(amount,shelf):
+    global totalApples
+    for i in range(shelf.size()):
+        if space(shelf) == True:
+            if(i < amount):
+                addOneApple(shelf,i)     
+        if space(shelf) == False:
+            i = i + 1   
+
+# This function tells us if we have a field to add a fruit to the shelf           
+def space(shelf):
+    for i in range(shelf.size()):
+        if shelf.items[i] == 0:
+            return True
+    return False
+
+#Function in charge of creating a shelf
+def createShelf(n):
+    shelf = Shelf(n)
+    return shelf
+
+#Function in charge of creating shelves m with a n capacity to store fruits
+def createShelves(m,n):
+    shelves = Shelves(m)
+    for i in range(m):
+        shelf = createShelf(n)
+        shelves.replace(i,shelf)
+    return shelves
+main()   
